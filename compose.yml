@@ -1,0 +1,106 @@
+services:
+  gateway:
+    build:
+      context: ./gateway
+    container_name: project-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      data-service:
+        condition: service_started
+      media-service:
+        condition: service_started
+    networks:
+      - backend
+
+  data-service:
+    build:
+      context: ./services/data-service
+    container_name: data-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: ${JWT_SECRET}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      FAST2SMS_API_KEY: ${FAST2SMS_API_KEY}
+      FAST2SMS_OTP_ID: ${FAST2SMS_OTP_ID}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      MONGO_DB_URL: ${DATABASE_URL}
+
+      REDIS_URL: redis://redis:6379
+
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+
+  media-service:
+    build:
+      context: ./services/media-service
+    container_name: media-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      MONGO_DB_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+      MEGA_EMAIL: ${MEGA_EMAIL}
+      MEGA_PASSWORD: ${MEGA_PASSWORD}
+      MEDIA_QUEUE_NAME: media-processing
+      MEDIA_CONCURRENCY: 2
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+
+
+  redis:
+    image: redis:8-alpine
+    container_name: project-redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - backend
+
+  mongodb:
+    image: mongo:8
+    container_name: project-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backend
+
+
+volumes:
+  redis_data:
+  mongodb_data:
+
+networks:
+  backend:
+    driver: bridge

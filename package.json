@@ -1,0 +1,27 @@
+{
+  "name": "companion_server",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/zinepratiksha3-debug/companion_server#readme",
+  "bugs": {
+    "url": "https://github.com/zinepratiksha3-debug/companion_server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zinepratiksha3-debug/companion_server.git"
+  },
+  "license": "ISC",
+  "author": "TopperSkills",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.2"
+  }
+}

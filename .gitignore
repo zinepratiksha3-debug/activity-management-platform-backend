@@ -1,4 +1,4 @@
-# Logs
+﻿# Logs
 logs
 *.log
 npm-debug.log*
@@ -141,3 +141,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Activity Companion security
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+dist/
+build/
+coverage/
+logs/
+*.log

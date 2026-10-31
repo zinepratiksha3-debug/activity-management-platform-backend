@@ -1,0 +1,164 @@
+# services:
+#   # =========================
+#   # Gateway
+#   # =========================
+
+#   gateway:
+#     build:
+#       context: ./gateway
+#     container_name: project-gateway
+#     ports:
+#       - "8080:80"
+#     depends_on:
+#       - auth-service
+#       - data-service
+#       - media-service
+#     networks:
+#       - backend
+
+#   # =========================
+#   # Application Services
+#   # =========================
+
+#   auth-service:
+#     build:
+#       context: ./services/auth-service
+#     container_name: auth-service
+#     environment:
+#       NODE_ENV: development
+#       PORT: 3000
+
+#       DATABASE_URL: ${AUTH_DATABASE_URL}
+
+#       REDIS_URL: redis://redis:6379
+
+#       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+#       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+
+#     networks:
+#       - backend
+
+#   data-service:
+#     build:
+#       context: ./services/data-service
+#     container_name: data-service
+#     environment:
+#       NODE_ENV: development
+#       PORT: 4000
+
+#       DATABASE_URL: ${DATA_DATABASE_URL}
+
+#       REDIS_URL: redis://redis:6379
+
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+
+#     networks:
+#       - backend
+
+#   media-service:
+#     build:
+#       context: ./services/media-service
+#     container_name: media-service
+#     environment:
+#       NODE_ENV: development
+#       PORT: 5000
+
+#       DATABASE_URL: ${MEDIA_DATABASE_URL}
+
+#       REDIS_URL: redis://redis:6379
+
+#       AWS_REGION: ${AWS_REGION}
+#       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+#       AWS_ORIGINAL_BUCKET: ${AWS_ORIGINAL_BUCKET}
+#       AWS_PROCESSED_BUCKET: ${AWS_PROCESSED_BUCKET}
+
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+
+#     networks:
+#       - backend
+
+#   # =========================
+#   # Infrastructure
+#   # =========================
+
+#   postgres:
+#     image: postgres:17
+#     container_name: project-postgres
+#     restart: unless-stopped
+
+#     environment:
+#       POSTGRES_USER: ${POSTGRES_USER}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#       POSTGRES_DB: ${POSTGRES_DB}
+
+#     ports:
+#       - "5432:5432"
+
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 10
+
+#     networks:
+#       - backend
+
+#   redis:
+#     image: redis:8-alpine
+#     container_name: project-redis
+#     restart: unless-stopped
+
+#     command:
+#       - redis-server
+#       - --appendonly
+#       - yes
+
+#     ports:
+#       - "6379:6379"
+
+#     volumes:
+#       - redis_data:/data
+
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 5s
+#       timeout: 3s
+#       retries: 10
+
+#     networks:
+#       - backend
+
+# =========================
+# Volumes
+# =========================
+
+# volumes:
+#   postgres_data:
+#   redis_data:
+
+# =========================
+# Network
+# =========================
+
+# networks:
+#   backend:
+#     driver: bridge
