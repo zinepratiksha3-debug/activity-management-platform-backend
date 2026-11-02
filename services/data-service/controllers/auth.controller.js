@@ -34,25 +34,33 @@ export const sendOTP = async (req, res) => {
       });
     }
 
-    const apiKey = process.env.FAST2SMS_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({
-        success: false,
-        message: "OTP service is not configured",
-      });
-    }
+   
+    // TEMPORARY OTP MODE - DEVELOPMENT ONLY
+// TEMPORARY OTP MODE - LOCAL + VERCEL PREVIEW
+if (
+  process.env.NODE_ENV !== "production" ||
+  process.env.VERCEL_ENV === "preview"
+) {
+  await redis.setex(`otp:${cleanMobile}`, 600, "123456");
 
-    const otp = generateOTP();
+  return res.status(200).json({
+    success: true,
+    message: "OTP sent successfully",
+  });
+}
 
-    // ✅ TEST MODE - development मध्ये
-    if (process.env.NODE_ENV === "development") {
-      await redis.setex(`otp:${cleanMobile}`, 600, "123456");
-      return res.status(200).json({
-        success: true,
-        message: "OTP sent successfully (test: 123456)",
-      });
-    }
+const apiKey = process.env.FAST2SMS_API_KEY;
 
+if (!apiKey) {
+  return res.status(500).json({
+    success: false,
+    message: "OTP service is not configured",
+  });
+}
+
+const otp = generateOTP();
+
+   
     // Production - Fast2SMS ला पाठवा
     await redis.setex(`otp:${cleanMobile}`, 600, otp);
 
