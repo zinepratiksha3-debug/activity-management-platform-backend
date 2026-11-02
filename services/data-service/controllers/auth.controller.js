@@ -37,10 +37,16 @@ export const sendOTP = async (req, res) => {
    
     // TEMPORARY OTP MODE - DEVELOPMENT ONLY
 // TEMPORARY OTP MODE - LOCAL + VERCEL PREVIEW
-if (
+// TEST OTP MODE - LOCAL, PREVIEW, AND ALLOWED TEST MOBILE
+const isTestEnvironment =
   process.env.NODE_ENV !== "production" ||
-  process.env.VERCEL_ENV === "preview"
-) {
+  process.env.VERCEL_ENV === "preview";
+
+const isAllowedTestMobile =
+  process.env.OTP_TEST_MODE === "true" &&
+  process.env.OTP_TEST_MOBILE === cleanMobile;
+
+if (isTestEnvironment || isAllowedTestMobile) {
   await redis.setex(`otp:${cleanMobile}`, 600, "123456");
 
   return res.status(200).json({
