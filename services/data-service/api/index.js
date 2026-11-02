@@ -19,8 +19,9 @@ app.use(helmet());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+  "https://ur-companion-dgqvy1jdq-pratiksha-portfolio1.vercel.app",
+  "https://ur-companion-three.vercel.app",
+];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -28,6 +29,7 @@ app.use(cors({
       return callback(null, true);
     }
 
+    console.error("Blocked CORS Origin:", origin);
     return callback(new Error("CORS: Origin not allowed"));
   },
   credentials: true,
